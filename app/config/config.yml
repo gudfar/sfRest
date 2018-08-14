@@ -69,3 +69,9 @@ swiftmailer:
 sensio_framework_extra:
    router:
         annotations: false
+
+lexik_jwt_authentication:
+    secret_key:       '%kernel.project_dir%/var/jwt/private.pem' # required for token creation
+    public_key:       '%kernel.project_dir%/var/jwt/public.pem'  # required for token verification
+    pass_phrase:      '%jwt_key_pass_phrase%' # required for token creation, usage of an environment variable is recommended
+    token_ttl:        3600
