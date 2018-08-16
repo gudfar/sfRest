@@ -15,6 +15,10 @@ security:
                 check_path: security_login_check
                 login_path: security_login_form
 
+            guard:
+                authenticators:
+                    - 'jwt_token_authenticator'
+
             logout:
                 # The route name the user can go to in order to logout
                 path: security_logout
