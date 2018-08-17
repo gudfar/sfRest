@@ -2,6 +2,8 @@
 
 namespace AppBundle\Security;
 
+use AppBundle\Api\ApiProblem;
+use AppBundle\Api\ResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
@@ -25,21 +27,31 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator
      * @var EntityManagerInterface
      */
     private $em;
+    /**
+     * @var ResponseFactory
+     */
+    private $responseFactory;
 
-    public function __construct(JWTEncoderInterface $jwtEncoder, EntityManagerInterface $em)
+    /**
+     * JwtTokenAuthenticator constructor.
+     * @param JWTEncoderInterface $jwtEncoder
+     * @param EntityManagerInterface $em
+     * @param ResponseFactory $responseFactory
+     */
+    public function __construct(JWTEncoderInterface $jwtEncoder, EntityManagerInterface $em, ResponseFactory $responseFactory)
     {
         $this->jwtEncoder = $jwtEncoder;
         $this->em = $em;
+        $this->responseFactory = $responseFactory;
     }
 
-    /**
-     * @param Request $request
-     * @param AuthenticationException|null $authException
-     * @return JsonResponse|\Symfony\Component\HttpFoundation\Response
-     */
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        return new JsonResponse(['error' => 'Auth required!'], 401);
+        $apiProblem = new ApiProblem(401);
+        $message = $authException ? $authException->getMessageKey() : 'Missing credentials';
+        $apiProblem->set('detail', $message);
+
+        return $this->responseFactory->createResponse($apiProblem);
     }
 
     public function getCredentials(Request $request)
@@ -89,7 +101,10 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        // TODO: Implement onAuthenticationFailure() method.
+        $apiProblem = new ApiProblem(401);
+        // you could translate this
+        $apiProblem->set('detail', $exception->getMessageKey());
+        return $this->responseFactory->createResponse($apiProblem);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)

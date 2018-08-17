@@ -273,4 +273,20 @@ EOF;
         ]);
         $this->assertEquals(401, $response->getStatusCode());
     }
+
+
+    public function testBadToken()
+    {
+        $response = $this->client->post('/api/programmers', [
+            'body' => '[]',
+            'headers' => [
+                'Authorization' => 'Bearer WRONG'
+            ]
+        ]);
+        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertEquals('application/problem+json', $response->getHeader('Content-Type')[0]);
+
+        $this->debugResponse($response);
+
+    }
 }
