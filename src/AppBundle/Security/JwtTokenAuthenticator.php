@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: gudfar
- * Date: 16.08.18
- * Time: 17:40
- */
 
 namespace AppBundle\Security;
 
@@ -12,8 +6,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\AuthorizationHeaderTokenExtractor;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -38,10 +32,14 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator
         $this->em = $em;
     }
 
-
+    /**
+     * @param Request $request
+     * @param AuthenticationException|null $authException
+     * @return JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        // TODO: Implement start() method.
+        return new JsonResponse(['error' => 'Auth required!'], 401);
     }
 
     public function getCredentials(Request $request)
@@ -103,5 +101,4 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator
     {
         return false;
     }
-
 }

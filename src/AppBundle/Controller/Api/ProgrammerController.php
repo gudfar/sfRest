@@ -10,12 +10,14 @@ use AppBundle\Form\ProgrammerType;
 use AppBundle\Form\UpdateProgrammerType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * @Security("is_granted('ROLE_USER')")
+ */
 class ProgrammerController extends BaseController
 {
     /**
