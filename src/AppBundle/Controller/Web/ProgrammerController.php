@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller\Web;
 
+use AppBundle\Battle\PowerManager;
 use AppBundle\Entity\Programmer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -10,6 +11,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use AppBundle\Controller\BaseController;
 
+/**
+ * Class ProgrammerController
+ * @package AppBundle\Controller\Web
+ */
 class ProgrammerController extends BaseController
 {
     /**
@@ -24,7 +29,7 @@ class ProgrammerController extends BaseController
     }
 
     /**
-     * @Route("/programmers/new", name="programmer_new_handle")
+     * @Route("/programmers/save", name="programmer_new_handle")
      * @Method("POST")
      */
     public function handleNewAction(Request $request)
@@ -47,7 +52,7 @@ class ProgrammerController extends BaseController
         $em->flush();
 
         $this->addFlash(sprintf('%s has been compiled and is ready for battle!', $programmer->getNickname()));
-        return $this->redirect($this->generateUrl('programmer_show', array('nickname' => $programmer->getNickname())));
+        return $this->redirectToRoute('programmer_show', ['nickname' => $programmer->getNickname()]);
     }
 
     /**
@@ -81,10 +86,13 @@ class ProgrammerController extends BaseController
     }
 
     /**
-     * @Route("/programmers/{nickname}/power/up", name="programmer_powerup")
-     * @Method("POST")
+     * @param $nickname
+     * @param PowerManager $powerManager
+     * @Route("/programmers/{nickname}/power/up", name="programmer_powerup", methods={"POST"})
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function powerUpAction($nickname)
+    public function powerUpAction($nickname, PowerManager $powerManager)
     {
         /** @var Programmer $programmer */
         $programmer = $this->getProgrammerRepository()->findOneByNickname($nickname);
@@ -93,14 +101,14 @@ class ProgrammerController extends BaseController
             throw new AccessDeniedException;
         }
 
-        $powerupDetails = $this->container->get('battle.power_manager')->powerUp($programmer);
+        $powerupDetails = $powerManager->powerUp($programmer);
 
         $this->addFlash(
             $powerupDetails['message'],
             $powerupDetails['powerChange'] > 0
         );
 
-        return $this->redirect($this->generateUrl('programmer_show', array('nickname' => $programmer->getNickname())));
+        return $this->redirectToRoute('programmer_show', ['nickname' => $programmer->getNickname()]);
     }
 
     /**

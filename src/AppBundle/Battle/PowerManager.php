@@ -5,6 +5,7 @@ namespace AppBundle\Battle;
 use AppBundle\Entity\Programmer;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class PowerManager
 {
@@ -47,16 +48,18 @@ class PowerManager
         
     );
 
-    public function __construct(EntityManager $em)
+    public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
 
     /**
+     *
      * Powers up this programmer
      *
      * @param Programmer $programmer
-     * @return string A description of what happened
+     * @return array
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function powerUp(Programmer $programmer)
     {
@@ -71,17 +74,15 @@ class PowerManager
 
         if ($powerChange > 0) {
             $key = array_rand(self::$positiveMessages);
-
             $message = sprintf(self::$positiveMessages[$key], $powerChange);
         } else {
             $key = array_rand(self::$negativeMessages);
-
             $message = sprintf(self::$negativeMessages[$key], $powerChange);
         }
 
-        return array(
+        return [
             'message' => $message,
-            'powerChange' => $powerChange,
-        );
+            'powerChange' => $powerChange
+        ];
     }
 } 

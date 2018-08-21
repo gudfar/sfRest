@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller\Web;
 
+use AppBundle\Battle\BattleManager;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -14,10 +15,12 @@ use AppBundle\Controller\BaseController;
 class BattleController extends BaseController
 {
     /**
-     * @Route("/battles/new", name="battle_new")
-     * @Method("POST")
+     * @Route("/battles/new", name="battle_new", methods={"POST"})
+     * @param Request $request
+     * @param BattleManager $battleManager
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, BattleManager $battleManager)
     {
         $programmerId = $request->request->get('programmer_id');
         $projectId = $request->request->get('project_id');
@@ -30,7 +33,7 @@ class BattleController extends BaseController
             throw new AccessDeniedException();
         }
 
-        $battle = $this->getBattleManager()->battle($programmer, $project);
+        $battle = $battleManager->battle($programmer, $project);
 
         return $this->redirect($this->generateUrl('battle_show', array('id' => $battle->getId())));
     }

@@ -5,13 +5,21 @@ namespace AppBundle\Battle;
 use AppBundle\Entity\Battle;
 use AppBundle\Entity\Programmer;
 use AppBundle\Entity\Project;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Class BattleManager
+ * @package AppBundle\Battle
+ */
 class BattleManager
 {
     private $em;
-
-    public function __construct(EntityManager $em)
+    
+    /**
+     * BattleManager constructor.
+     * @param EntityManagerInterface $em
+     */
+    public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
