@@ -8,16 +8,17 @@ use AppBundle\Controller\BaseController;
 use AppBundle\Entity\Programmer;
 use AppBundle\Form\ProgrammerType;
 use AppBundle\Form\UpdateProgrammerType;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Security("is_granted('ROLE_USER')")
- */
+///**
+// * @Security("is_granted('ROLE_USER')")
+// */
 class ProgrammerController extends BaseController
 {
     /**
@@ -27,8 +28,6 @@ class ProgrammerController extends BaseController
      */
     public function newAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
-
         $programmer = new Programmer();
         $form = $this->createForm(ProgrammerType::class, $programmer);
         $this->processForm($request, $form);
@@ -37,79 +36,62 @@ class ProgrammerController extends BaseController
             $this->throwApiProblemValidationException($form);
         }
 
-        $programmer->setUser($this->getUser());
+        $programmer->setUser($this->findUserByUsername('weaverryan'));
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($programmer);
         $em->flush();
 
         $response = $this->createApiResponse($programmer, 201);
-        $programmerUrl = $this->generateUrl(
-            'api_programmers_show',
-            ['nickname' => $programmer->getNickname()]
-        );
-        $response->headers->set('Location', $programmerUrl);
+        $response->headers
+            ->set(
+                'Location',
+                $this->generateUrl('api_programmers_show', [
+                    'nickname' => $programmer->getNickname()
+                ])
+            );
 
         return $response;
+
     }
 
     /**
-     * @Route("/api/programmers/{nickname}", name="api_programmers_show")
-     * @Method("GET")
+     * @Route("/api/programmers/{nickname}", name="api_programmers_show", methods={"GET"})
+     * @param Programmer $programmer
+     * @return Response
      */
-    public function showAction($nickname)
+    public function showAction(Programmer $programmer)
     {
-        $programmer = $this->getDoctrine()
-            ->getRepository('AppBundle:Programmer')
-            ->findOneByNickname($nickname);
+        return  $this->createApiResponse($programmer, 200);
+    }
 
-        if (!$programmer) {
-            throw $this->createNotFoundException(sprintf(
-                'No programmer found with nickname "%s"',
-                $nickname
-            ));
+    /**
+     * @Route("/api/programmers", name="api_programmers_collection", methods={"GET"})
+     * @return Response
+     */
+    public function listAction()
+    {
+        $programmers = $this->getDoctrine()
+            ->getRepository(Programmer::class)
+            ->findAll();
+
+        $data = ['programmers' => []];
+
+        foreach ($programmers as $programmer) {
+            $data['programmers'][] = $this->serializeProgrammer($programmer);
         }
 
-        $response = $this->createApiResponse($programmer, 200);
-
-        return $response;
+        return $this->createApiResponse($data, 200);
     }
 
     /**
-     * @Route("/api/programmers", name="api_programmers_collection")
-     * @Method("GET")
+     * @param Programmer $programmer
+     * @param Request $request
+     * @Route("/api/programmers/{nickname}", methods={"PUT", "PATCH"})
+     * @return Response
      */
-    public function listAction(Request $request)
+    public function updateAction(Programmer $programmer, Request $request)
     {
-        $filter = $request->query->get('filter');
-
-        $qb = $this->getDoctrine()
-            ->getRepository('AppBundle:Programmer')
-            ->findAllQueryBuilder($filter);
-        $paginatedCollection = $this->get('pagination_factory')
-            ->createCollection($qb, $request, 'api_programmers_collection');
-
-        $response = $this->createApiResponse($paginatedCollection, 200);
-
-        return $response;
-    }
-
-    /**
-     * @Route("/api/programmers/{nickname}")
-     * @Method({"PUT", "PATCH"})
-     */
-    public function updateAction($nickname, Request $request)
-    {
-        $programmer = $this->getDoctrine()
-            ->getRepository('AppBundle:Programmer')
-            ->findOneByNickname($nickname);
-
-        if (!$programmer) {
-            throw $this->createNotFoundException(sprintf(
-                'No programmer found with nickname "%s"',
-                $nickname
-            ));
-        }
 
         $form = $this->createForm(UpdateProgrammerType::class, $programmer);
         $this->processForm($request, $form);
@@ -128,15 +110,12 @@ class ProgrammerController extends BaseController
     }
 
     /**
-     * @Route("/api/programmers/{nickname}")
-     * @Method("DELETE")
+     * @Route("/api/programmers/{nickname}", methods={"DELETE"})
+     * @param Programmer $programmer
+     * @return Response
      */
-    public function deleteAction($nickname)
+    public function deleteAction(Programmer $programmer)
     {
-        $programmer = $this->getDoctrine()
-            ->getRepository('AppBundle:Programmer')
-            ->findOneByNickname($nickname);
-
         if ($programmer) {
             // debated point: should we 404 on an unknown nickname?
             // or should we just return a nice 204 in all cases?
@@ -191,5 +170,16 @@ class ProgrammerController extends BaseController
         $apiProblem->set('errors', $errors);
 
         throw new ApiProblemException($apiProblem);
+    }
+
+
+    private function serializeProgrammer(Programmer $programmer)
+    {
+        return [
+            'nickname' => $programmer->getNickname(),
+            'avatarNumber' => $programmer->getAvatarNumber(),
+            'powerLevel' => $programmer->getPowerLevel(),
+            'tagLine' => $programmer->getTagLine(),
+        ];
     }
 }

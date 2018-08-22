@@ -105,8 +105,7 @@ class ApiTestCase extends KernelTestCase
 
     protected function getService($id)
     {
-        return self::$kernel->getContainer()
-            ->get($id);
+        return self::$kernel->getContainer()->get($id);
     }
 
     protected function printLastRequestUrl()
