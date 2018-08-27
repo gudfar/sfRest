@@ -39,21 +39,45 @@ class ProgrammerControllerTest extends ApiTestCase
 
     public function testGETProgrammer()
     {
-        $this->createProgrammer(array(
+        $this->createProgrammer([
             'nickname' => 'UnitTester',
             'avatarNumber' => 3,
-        ));
+        ]);
 
         $response = $this->client->get('/api/programmers/UnitTester');
         $this->assertEquals(200, $response->getStatusCode());
 
-        $data = (array)json_decode($response->getBody());
+        $this->asserter()->assertResponsePropertiesExist($response, [
+            'nickname',
+            'avatar_number',
+            'tag_line',
+            'power_level',
+            '_links'
+        ]);
 
-        $this->assertArrayHasKey('nickname', $data);
-        $this->assertArrayHasKey('avatar_number', $data);
-        $this->assertArrayHasKey('tag_line', $data);
-        $this->assertArrayHasKey('power_level', $data);
-        $this->assertArrayHasKey('_links', $data);
+        $this->asserter()->assertResponsePropertyEquals($response, 'nickname', 'UnitTester');
+    }
+
+
+
+    public function testGETProgrammersCollection()
+    {
+
+        $this->createProgrammer(array(
+            'nickname' => 'UnitTester',
+            'avatarNumber' => 3,
+        ));
+        $this->createProgrammer(array(
+            'nickname' => 'CowboyCoder',
+            'avatarNumber' => 5,
+        ));
+
+        $response = $this->client->get('/api/programmers');
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->asserter()->assertResponsePropertyIsArray($response, 'programmers');
+        $this->asserter()->assertResponsePropertyCount($response, 'programmers', 2);
+        $this->asserter()->assertResponsePropertyEquals($response, 'programmers[1].nickname', 'CowboyCoder');
+
     }
 
 }

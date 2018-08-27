@@ -10,7 +10,6 @@ class Link
 {
     /**
      * @Required
-     *
      * @var string
      */
     public $name;
@@ -22,5 +21,8 @@ class Link
      */
     public $route;
 
-    public $params = array();
+    /**
+     * @var array
+     */
+    public $params = [];
 }
