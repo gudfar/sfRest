@@ -78,7 +78,7 @@ class ProgrammerController extends BaseController
         $data = ['programmers' => []];
 
         foreach ($programmers as $programmer) {
-            $data['programmers'][] = $this->serializeProgrammer($programmer);
+            $data['programmers'][] = $programmer;
         }
 
         return $this->createApiResponse($data, 200);
@@ -117,9 +117,6 @@ class ProgrammerController extends BaseController
     public function deleteAction(Programmer $programmer)
     {
         if ($programmer) {
-            // debated point: should we 404 on an unknown nickname?
-            // or should we just return a nice 204 in all cases?
-            // we're doing the latter
             $em = $this->getDoctrine()->getManager();
             $em->remove($programmer);
             $em->flush();
@@ -170,16 +167,5 @@ class ProgrammerController extends BaseController
         $apiProblem->set('errors', $errors);
 
         throw new ApiProblemException($apiProblem);
-    }
-
-
-    private function serializeProgrammer(Programmer $programmer)
-    {
-        return [
-            'nickname' => $programmer->getNickname(),
-            'avatarNumber' => $programmer->getAvatarNumber(),
-            'powerLevel' => $programmer->getPowerLevel(),
-            'tagLine' => $programmer->getTagLine(),
-        ];
     }
 }
