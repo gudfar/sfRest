@@ -78,7 +78,7 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
         $data = $apiProblem->toArray();
         // making type a URL, to a temporarily fake page
         if ($data['type'] != 'about:blank') {
-            $data['type'] = 'http://localhost:8000/docs/errors#'.$data['type'];
+            $data['type'] = 'http://localhost/docs/errors#'.$data['type'];
         }
 
         $response = new JsonResponse(
@@ -90,11 +90,14 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
         $event->setResponse($response);
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
-        return array(
+        return[
             KernelEvents::EXCEPTION => 'onKernelException'
-        );
+        ];
     }
 
     /**

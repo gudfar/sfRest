@@ -159,8 +159,37 @@ class ProgrammerControllerTest extends ApiTestCase
         $this->asserter()->assertResponsePropertyEquals($response, 'errors.nickname[0]', 'Please enter a clever nickname');
         $this->asserter()->assertResponsePropertyDoesNotExist($response, 'errors.avatarNumber');
         $this->assertEquals('application/problem+json', $response->getHeader('Content-Type')[0]);
+    }
+
+    public function testInvalidJson()
+    {
+        $invalidBody = <<<EOF
+        {
+            "avatarNumber" : "2
+            "tagLine": "I'm from a test!"
+        }
+EOF;
+        
+        
+        $response = $this->client->post('/api/programmers', [
+            'body' => $invalidBody
+        ]);
+        $this->debugResponse($response);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->asserter()->assertResponsePropertyContains($response, 'type', 'invalid_body_format');
+        $this->asserter()->assertResponsePropertyEquals($response, 'title', 'Invalid JSON format sent');
+
+    }
 
 
+    public function test404Exception()
+    {
+        $response = $this->client->get('/api/programmers/fake');
+        $this->assertEquals(404, $response->getStatusCode());
+        $this->assertEquals('application/problem+json', $response->getHeader('Content-Type')[0]);
+        $this->asserter()->assertResponsePropertyEquals($response, 'type', 'about:blank');
+        $this->asserter()->assertResponsePropertyEquals($response, 'title', 'Not Found');
+        $this->asserter()->assertResponsePropertyEquals($response, 'detail', 'AppBundle\Entity\Programmer object not found by the @ParamConverter annotation.');
     }
 
 }

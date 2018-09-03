@@ -156,6 +156,9 @@ class ProgrammerController extends BaseController
         return $errors;
     }
 
+    /**
+     * @param FormInterface $form
+     */
     private function throwApiProblemValidationException(FormInterface $form)
     {
         $errors = $this->getErrorsFromForm($form);

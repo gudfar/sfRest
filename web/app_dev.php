@@ -16,6 +16,7 @@ if (isset($_SERVER['HTTP_CLIENT_IP'])
         '127.0.0.1',
         '172.23.0.1',
         '172.23.0.2',
+        '172.23.0.3',
         '::1'], true) || PHP_SAPI === 'cli-server')
 ) {
     header('HTTP/1.0 403 Forbidden');

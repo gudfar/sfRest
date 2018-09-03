@@ -4,10 +4,24 @@ namespace AppBundle\Api;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * Class ApiProblemException
+ * @package AppBundle\Api
+ */
 class ApiProblemException extends HttpException
 {
+    /**
+     * @var ApiProblem
+     */
     private $apiProblem;
 
+    /**
+     * ApiProblemException constructor.
+     * @param ApiProblem $apiProblem
+     * @param \Exception|null $previous
+     * @param array $headers
+     * @param int $code
+     */
     public function __construct(ApiProblem $apiProblem, \Exception $previous = null, array $headers = array(), $code = 0)
     {
         $this->apiProblem = $apiProblem;
@@ -17,6 +31,9 @@ class ApiProblemException extends HttpException
         parent::__construct($statusCode, $message, $previous, $headers, $code);
     }
 
+    /**
+     * @return ApiProblem
+     */
     public function getApiProblem()
     {
         return $this->apiProblem;
