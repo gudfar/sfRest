@@ -77,23 +77,10 @@ class ProgrammerController extends BaseController
      */
     public function listAction(Request $request, PaginationFactory $paginationFactory)
     {
-        $page = $request->query->get('page', 1);
         $filter = $request->query->get('filter');
-
         $qb = $this->getDoctrine()
             ->getRepository(Programmer::class)
             ->findAllQueryBuilder($filter);
-
-        $adapter = new DoctrineORMAdapter($qb);
-        $pagerfanta = new Pagerfanta($adapter);
-        $pagerfanta->setMaxPerPage(10);
-        $pagerfanta->setCurrentPage($page);
-
-        $programmers = [];
-        foreach ($pagerfanta->getCurrentPageResults() as $programmer) {
-            $programmers[] = $programmer;
-        }
-
 
         $paginatedCollection = $paginationFactory
             ->createCollection($qb, $request, 'api_programmers_collection');
