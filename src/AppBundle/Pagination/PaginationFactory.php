@@ -8,15 +8,33 @@ use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * Class PaginationFactory
+ * @package AppBundle\Pagination
+ */
 class PaginationFactory
 {
+    /**
+     * @var RouterInterface
+     */
     private $router;
 
+    /**
+     * PaginationFactory constructor.
+     * @param RouterInterface $router
+     */
     public function __construct(RouterInterface $router)
     {
         $this->router = $router;
     }
 
+    /**
+     * @param QueryBuilder $qb
+     * @param Request $request
+     * @param $route
+     * @param array $routeParams
+     * @return PaginatedCollection
+     */
     public function createCollection(QueryBuilder $qb, Request $request, $route, array $routeParams = array())
     {
         $page = $request->query->get('page', 1);

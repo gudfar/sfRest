@@ -8,6 +8,10 @@ use AppBundle\Controller\BaseController;
 use AppBundle\Entity\Programmer;
 use AppBundle\Form\ProgrammerType;
 use AppBundle\Form\UpdateProgrammerType;
+use AppBundle\Pagination\PaginatedCollection;
+use AppBundle\Pagination\PaginationFactory;
+use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Pagerfanta;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormInterface;
@@ -66,22 +70,35 @@ class ProgrammerController extends BaseController
     }
 
     /**
+     * @param Request $request
+     * @param PaginationFactory $paginationFactory
      * @Route("/api/programmers", name="api_programmers_collection", methods={"GET"})
      * @return Response
      */
-    public function listAction()
+    public function listAction(Request $request, PaginationFactory $paginationFactory)
     {
-        $programmers = $this->getDoctrine()
+        $page = $request->query->get('page', 1);
+        $filter = $request->query->get('filter');
+
+        $qb = $this->getDoctrine()
             ->getRepository(Programmer::class)
-            ->findAll();
+            ->findAllQueryBuilder($filter);
 
-        $data = ['programmers' => []];
+        $adapter = new DoctrineORMAdapter($qb);
+        $pagerfanta = new Pagerfanta($adapter);
+        $pagerfanta->setMaxPerPage(10);
+        $pagerfanta->setCurrentPage($page);
 
-        foreach ($programmers as $programmer) {
-            $data['programmers'][] = $programmer;
+        $programmers = [];
+        foreach ($pagerfanta->getCurrentPageResults() as $programmer) {
+            $programmers[] = $programmer;
         }
 
-        return $this->createApiResponse($data, 200);
+
+        $paginatedCollection = $paginationFactory
+            ->createCollection($qb, $request, 'api_programmers_collection');
+
+        return $this->createApiResponse($paginatedCollection);
     }
 
     /**
