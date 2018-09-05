@@ -10,14 +10,32 @@ use JMS\Serializer\JsonSerializationVisitor;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * Class LinkSerializationSubscriber
+ * @package AppBundle\Serializer
+ */
 class LinkSerializationSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var RouterInterface
+     */
     private $router;
 
+    /**
+     * @var Reader
+     */
     private $annotationReader;
 
+    /**
+     * @var ExpressionLanguage
+     */
     private $expressionLanguage;
 
+    /**
+     * LinkSerializationSubscriber constructor.
+     * @param RouterInterface $router
+     * @param Reader $annotationReader
+     */
     public function __construct(RouterInterface $router, Reader $annotationReader)
     {
         $this->router = $router;
@@ -25,6 +43,9 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
         $this->expressionLanguage = new ExpressionLanguage();
     }
 
+    /**
+     * @param ObjectEvent $event
+     */
     public function onPostSerialize(ObjectEvent $event)
     {
         /** @var JsonSerializationVisitor $visitor */
@@ -34,7 +55,7 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
         $annotations = $this->annotationReader
             ->getClassAnnotations(new \ReflectionObject($object));
 
-        $links = array();
+        $links = [];
         foreach ($annotations as $annotation) {
             if ($annotation instanceof Link) {
                 $uri = $this->router->generate(
@@ -50,7 +71,12 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
         }
     }
 
-    private function resolveParams(array $params, $object)
+    /**
+     * @param array $params
+     * @param $object
+     * @return array
+     */
+    private function resolveParams(array $params, $object): array
     {
         foreach ($params as $key => $param) {
             $params[$key] = $this->expressionLanguage
@@ -60,14 +86,15 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
         return $params;
     }
 
-    public static function getSubscribedEvents()
+    /**
+     * @return array
+     */
+    public static function getSubscribedEvents(): array
     {
-        return array(
-            array(
-                'event' => 'serializer.post_serialize',
-                'method' => 'onPostSerialize',
-                'format' => 'json',
-            )
-        );
+        return [[
+            'event' => 'serializer.post_serialize',
+            'method' => 'onPostSerialize',
+            'format' => 'json',
+        ]];
     }
 }
