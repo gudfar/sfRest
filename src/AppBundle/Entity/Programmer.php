@@ -71,6 +71,11 @@ class Programmer
      */
     private $user;
 
+    /**
+     * Programmer constructor.
+     * @param null $nickname
+     * @param null $avatarNumber
+     */
     public function __construct($nickname = null, $avatarNumber = null)
     {
         $this->nickname = $nickname;

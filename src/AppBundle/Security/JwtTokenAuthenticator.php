@@ -4,6 +4,7 @@ namespace AppBundle\Security;
 
 use AppBundle\Api\ApiProblem;
 use AppBundle\Api\ResponseFactory;
+use AppBundle\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
@@ -17,6 +18,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
+/**
+ * Class JwtTokenAuthenticator
+ * @package AppBundle\Security
+ */
 class JwtTokenAuthenticator extends AbstractGuardAuthenticator
 {
     /**
@@ -45,6 +50,11 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator
         $this->responseFactory = $responseFactory;
     }
 
+    /**
+     * @param Request $request
+     * @param AuthenticationException|null $authException
+     * @return JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function start(Request $request, AuthenticationException $authException = null)
     {
         $apiProblem = new ApiProblem(401);
@@ -54,6 +64,10 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator
         return $this->responseFactory->createResponse($apiProblem);
     }
 
+    /**
+     * @param Request $request
+     * @return bool|false|mixed|null|string|string[]|void
+     */
     public function getCredentials(Request $request)
     {
         $extractor = new AuthorizationHeaderTokenExtractor(
@@ -88,17 +102,27 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator
         }
 
         return $this->em
-            ->getRepository('AppBundle:User')
+            ->getRepository(User::class)
             ->findOneBy(['username' => $data['username']])
             ;
 
     }
 
+    /**
+     * @param mixed $credentials
+     * @param UserInterface $user
+     * @return bool
+     */
     public function checkCredentials($credentials, UserInterface $user)
     {
         return true;
     }
 
+    /**
+     * @param Request $request
+     * @param AuthenticationException $exception
+     * @return null|JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
         $apiProblem = new ApiProblem(401);
@@ -107,11 +131,20 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator
         return $this->responseFactory->createResponse($apiProblem);
     }
 
+    /**
+     * @param Request $request
+     * @param TokenInterface $token
+     * @param string $providerKey
+     * @return null|\Symfony\Component\HttpFoundation\Response|void
+     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
         // TODO: Implement onAuthenticationSuccess() method.
     }
 
+    /**
+     * @return bool
+     */
     public function supportsRememberMe()
     {
         return false;

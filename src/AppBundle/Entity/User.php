@@ -28,6 +28,7 @@ class User implements UserInterface
     private $username;
 
     /**
+     * @Serializer\Expose()
      * @ORM\Column(type="string", unique=true)
      */
     private $email;

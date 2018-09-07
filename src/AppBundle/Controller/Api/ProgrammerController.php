@@ -20,9 +20,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-///**
-// * @Security("is_granted('ROLE_USER')")
-// */
+/**
+ * @Security("is_granted('ROLE_USER')")
+ */
 class ProgrammerController extends BaseController
 {
     /**
@@ -40,7 +40,7 @@ class ProgrammerController extends BaseController
             $this->throwApiProblemValidationException($form);
         }
 
-        $programmer->setUser($this->findUserByUsername('weaverryan'));
+        $programmer->setUser($this->getUser());
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($programmer);

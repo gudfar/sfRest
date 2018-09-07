@@ -22,7 +22,7 @@ security:
                 # The route name that the login form submits to
                 check_path: security_login_check
                 login_path: security_login_form
-
+            logout_on_user_change: true
             guard:
                 authenticators:
                     - 'jwt_token_authenticator'

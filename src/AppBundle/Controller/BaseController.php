@@ -127,7 +127,7 @@ abstract class BaseController extends Controller
         $context->setSerializeNull(true);
 
         $request = $this->get('request_stack')->getCurrentRequest();
-        $groups = array('Default');
+        $groups = ['Default'];
         if ($request->query->get('deep')) {
             $groups[] = 'deep';
         }

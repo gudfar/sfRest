@@ -3,6 +3,7 @@
 namespace AppBundle\Controller\Api;
 
 use AppBundle\Controller\BaseController;
+use AppBundle\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,8 +28,9 @@ class TokenController extends BaseController
      */
     public function newTokenAction(Request $request, UserPasswordEncoderInterface $encoder, JWTEncoderInterface $tokenEncoder)
     {
+
         $user = $this->getDoctrine()
-            ->getRepository('AppBundle:User')
+            ->getRepository(User::class)
             ->findOneBy(['username' => $request->getUser()]);
         if (!$user) {
             throw $this->createNotFoundException();
